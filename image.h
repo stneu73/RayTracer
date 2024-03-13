@@ -5,6 +5,7 @@
 #ifndef RAYTRACER_IMAGE_H
 #define RAYTRACER_IMAGE_H
 
+#include <iostream>
 
 class image {
 
