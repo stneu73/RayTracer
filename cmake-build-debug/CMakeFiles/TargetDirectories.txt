@@ -1,0 +1,3 @@
+C:/Users/Spencer/Documents/Classes/2024 Winter/C S 455/RayTracer/cmake-build-debug/CMakeFiles/RayTracer.dir
+C:/Users/Spencer/Documents/Classes/2024 Winter/C S 455/RayTracer/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Spencer/Documents/Classes/2024 Winter/C S 455/RayTracer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
