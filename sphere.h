@@ -11,7 +11,8 @@
 
 class sphere : public hittable {
 public:
-    sphere(point3 _center, double _radius) : center(_center), radius(_radius) {}
+    sphere(point3 _center, double _radius, const shared_ptr<material>& _mat) : center(_center), radius(_radius),
+    mat(_mat->kd,_mat->ks,_mat->ka,_mat->od,_mat->os,_mat->kgls){}
 
     bool hit(const ray& r, interval(ray_t), hit_record& rec) const override {
         vec3 oc = r.origin() - center;
@@ -39,9 +40,14 @@ public:
         return true;
     }
 
+    material getMat() override {
+        return mat;
+    }
+
 private:
     point3 center;
     double radius;
+    material mat;
 };
 
 

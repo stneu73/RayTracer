@@ -17,11 +17,18 @@ class camera {
 public:
     double aspect_ratio;
     int image_width;
+    int max_depth = 10;
 
-    void render(const hittable& world) {
+    std::string filename;
+    double vfov;
+    point3 lookfrom;
+    point3 lookat;
+    vec3   lookup;
+
+    void render(const hittable& world, color ambient, color lightSource, color background) {
         initialize();
 
-        std::ofstream out("two spheres after refactor.ppm");
+        std::ofstream out(filename);
 
         out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
@@ -32,7 +39,7 @@ public:
                 auto ray_direction = pixel_center - center;
                 ray r(center, ray_direction);
 
-                color pixel_color = ray_color(r,world);
+                color pixel_color = ray_color(r,world,ambient, lightSource, background);
                 write_color(out, pixel_color);
             }
         }
@@ -45,21 +52,29 @@ private:
     point3 pixel00_loc;    // location of pixel (0,0)
     vec3 pixel_delta_u;     // offset to pixel to the right
     vec3 pixel_delta_v;     // offset to pixel below
+    vec3 u,v,w;
 
     void initialize() {
         image_height = static_cast<int>(image_width / aspect_ratio);
         image_height = (image_height < 1) ? 1 : image_height;
 
-        center = point3(0, 0, 0);
+        center = lookfrom;
 
         //viewport dimensions
-        auto focal_length = 1.0;
-        auto viewport_height = 2.0;
+        auto focal_length = (lookfrom-lookat).length();
+        auto theta = degrees_to_radians(vfov);
+        auto h = tan(theta/2);
+        auto viewport_height = 2 * h * focal_length;
         auto viewport_width = viewport_height * (static_cast<double>(image_width)/image_height);
 
+        // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+        w = unit_vector(lookfrom - lookat);
+        u = unit_vector(cross(lookup, w));
+        v = cross(w, u);
+
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        auto viewport_u = vec3(viewport_width, 0, 0);
-        auto viewport_v = vec3(0, -viewport_height, 0);
+        auto viewport_u = viewport_width * u;
+        auto viewport_v = viewport_height * -v;
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         pixel_delta_u = viewport_u / image_width;
@@ -67,19 +82,23 @@ private:
 
         // Calculate the location of the upper left pixel.
         auto viewport_upper_left = center
-                                   - vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2;
+                                   - focal_length * w - viewport_u/2 - viewport_v/2;
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
-    static color ray_color(const ray& r, const hittable& world) {
-        hit_record rec;
-        if (world.hit(r,interval(0,infinity), rec)) {
-            return 0.5 * (rec.normal + color(1,1,1));
-        }
+    static color ray_color(const ray& r, const hittable& world, color ambient, color lightSource, color background) {
 
-        vec3 unit_direction = unit_vector(r.direction());
-        auto a = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-a)*color(0.5,0.5,0.5) + a*color(0.5,0.7,1.0);
+        hit_record rec;
+
+        if (world.hit(r,interval(0,infinity), rec)) {
+
+            return rec.obMat.illuminationEq(ambient, lightSource, r.direction(), rec.normal) ; //illumination equation goes here
+            //return 0.5 * (rec.normal + color(1,1,1));
+        }
+//        vec3 unit_direction = unit_vector(r.direction());
+//        auto a = 0.5*(unit_direction.y() + 1.0);
+        return background;
+        //return (1.0-a)*color(0.5,0.5,0.5) + a*color(0.5,0.7,1.0);
     }
 };
 
