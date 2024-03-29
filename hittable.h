@@ -7,6 +7,7 @@
 
 
 #include "ray.h"
+#include "material.h"
 
 class hit_record {
 public:
@@ -14,6 +15,7 @@ public:
     vec3 normal;
     double t;
     bool front_face;
+    material obMat;
 
     void set_face_normal(const ray& r, const vec3& outward_normal) {
         // Sets the hit record normal vector.
@@ -29,6 +31,14 @@ public:
     virtual ~hittable() = default;
 
     virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+
+//    virtual shared_ptr<hittable> objectHit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+
+    virtual material getMat() {return mat;}
+
+private:
+    material mat;
+
 };
 
 
