@@ -96,10 +96,10 @@ private:
             return rec.obMat.illuminationEq(ambient, lightSource, r.direction(), rec.normal,lightDir);
             //return 0.5 * (rec.normal + color(1,1,1));
         }
-//        vec3 unit_direction = unit_vector(r.direction());
-//        auto a = 0.5*(unit_direction.y() + 1.0);
-        return background;
-        //return (1.0-a)*color(0.5,0.5,0.5) + a*color(0.5,0.7,1.0);
+        vec3 unit_direction = unit_vector(r.direction());
+        auto a = 0.5*(unit_direction.x() + 1.0);
+//        return background;
+        return color(0.0,0.0,0.0) + (1.0-a)*color(0.3,0.0,0.0);
     }
 };
 
