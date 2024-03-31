@@ -12,21 +12,50 @@
 int main() {
     hittable_list world;
 
-    world.add(make_shared<sphere>(point3(0,0,0),0.4,make_shared<material>(
-            0.7, 0.2, 0.1, color{1.0, 0, 1.0}, color{1.0, 1.0, 1.0}, 16.0)));
+//    world.add(make_shared<sphere>(point3(0,0,0),0.4,make_shared<material>(
+//            0.7, 0.2, 0.1, color{1.0, 0, 1.0}, color{1.0, 1.0, 1.0}, 16.0)));
+
+
+    //scene 2
+    //white sphere
+    world.add(make_shared<sphere>(point3(0.45,0.0,-0.15),0.15,make_shared<material>(
+            0.8, 0.1, 0.3, color{1.0, 1.0, 1.0}, color{1.0, 1.0, 1.0}, 4.0)));
+    //red sphere
+    world.add(make_shared<sphere>(point3(0.0,0,-0.1),0.2,make_shared<material>(
+            0.6, 0.3, 0.1, color{1.0, 0.0, 0.0}, color{1.0, 1.0, 1.0}, 32.0)));
+    //green sphere
+    world.add(make_shared<sphere>(point3(-0.6,0,0.0),0.3,make_shared<material>(
+            0.7, 0.2, 0.1, color{0.0, 1.0, 0.0}, color{0.5, 1.0, 0.5}, 64.0)));
+    //large blue sphere
+    world.add(make_shared<sphere>(point3(0.0,-10000.5,0.0),10000.0,make_shared<material>(
+            0.9, 0.0, 0.1, color{0.0, 0.0, 1.0}, color{1.0, 1.0, 1.0}, 16.0)));
 
     camera cam;
-    cam.filename = "viewport test 1.ppm";
+
+    cam.filename = "final render image 2.ppm";
     cam.aspect_ratio = 1;
     cam.image_width = 400;
-    cam.vfov = 90;
+    cam.vfov = 60;
     cam.lookfrom = {0,0,1};
     cam.lookat = {0,0,0};
     cam.lookup = {0,1,0};
 
-    color ambient{0.0,0.0,0.0};
+    //first render
+//    vec3 lightDir = {0.0,1.0,0.0};
+//    color ambient{0.0,0.0,0.0};
+
+    //second render
+    vec3 lightDir = {1.0,1.0,1.0};
+    color ambient{0.1,0.1,0.1};
     color lightSource{1.0,1.0,1.0};
+//    color lightSource{0.5,0.5,0.5}; // weaker light source for testing
+
+
     color background{0.2,0.2,0.2};
 
-    cam.render(world, ambient, lightSource, background);
+
+    cam.render(world, ambient, lightSource, background, lightDir);
+
+
+
 }

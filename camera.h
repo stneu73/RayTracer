@@ -25,21 +25,22 @@ public:
     point3 lookat;
     vec3   lookup;
 
-    void render(const hittable& world, color ambient, color lightSource, color background) {
+    void render(const hittable& world, color ambient, color lightSource, color background, vec3 lightDir) {
         initialize();
 
         std::ofstream out(filename);
 
         out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
+//        int pixelnum = 0; //used for debugging by isolating a single pixel
         for (int j = 0; j < image_height; ++j) {
             std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
             for (int i = 0; i < image_width; ++i) {
+//                pixelnum += 1;
                 auto pixel_center = pixel00_loc + (i* pixel_delta_u) + (j * pixel_delta_v);
                 auto ray_direction = pixel_center - center;
                 ray r(center, ray_direction);
 
-                color pixel_color = ray_color(r,world,ambient, lightSource, background);
+                color pixel_color = ray_color(r,world,ambient, lightSource, background, lightDir);
                 write_color(out, pixel_color);
             }
         }
@@ -86,13 +87,13 @@ private:
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
-    static color ray_color(const ray& r, const hittable& world, color ambient, color lightSource, color background) {
+    static color ray_color(const ray& r, const hittable& world, color ambient, color lightSource, color background, vec3 lightDir) {
 
         hit_record rec;
 
         if (world.hit(r,interval(0,infinity), rec)) {
 
-            return rec.obMat.illuminationEq(ambient, lightSource, r.direction(), rec.normal) ; //illumination equation goes here
+            return rec.obMat.illuminationEq(ambient, lightSource, r.direction(), rec.normal,lightDir);
             //return 0.5 * (rec.normal + color(1,1,1));
         }
 //        vec3 unit_direction = unit_vector(r.direction());
