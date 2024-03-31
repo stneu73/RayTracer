@@ -7,6 +7,7 @@
 
 #include "color.h"
 #include <cmath>
+#include <algorithm>
 
 class material {
 public:
@@ -29,20 +30,32 @@ public:
 
     }
 
-    color illuminationEq(color Ia, color Ip, vec3 v, vec3 normal) {
+    color illuminationEq(color Ia, color Ip, vec3 v, vec3 normal, vec3 L) {
 
-        vec3 L = {0.0,1.0,0.0};
+
         color amb = Ia * ka * od;
 
-        double NdotL = dot(normal, L);
+        double NdotL = dot(unit_vector(normal), unit_vector(L));
         color diffuse = kd * Ip * od * std::max(0.0,NdotL);
 
         vec3 r = 2*normal*dot(normal,L)-L;
 
-        double VdotR = dot(v,-r);
+        double VdotR = dot(unit_vector(v), unit_vector(-r)); //-r because the equation assumes that r is coming from the point
         color specular = ks * os * Ip * pow(std::max(0.0,VdotR),kgls); //phong
+        color totalColor = amb + diffuse + specular;
+        totalColor = clamp(totalColor,0.0,1.0);
+        return totalColor;
+    }
 
-        return amb + diffuse + specular;
+    color clamp(color vec,double min, double max) {
+        for (int i = 0; i <= 2; i++) {
+            if (vec[i] < 0) {
+                vec[i] = 0;
+            } else if (vec[i] > 1) {
+                vec[i] = 1;
+            } else {}
+        }
+        return vec;
     }
 
     double kd;
