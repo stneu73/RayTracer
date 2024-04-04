@@ -33,7 +33,7 @@ public:
         out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 //        int pixelnum = 0; //used for debugging by isolating a single pixel
         for (int j = 0; j < image_height; ++j) {
-            std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+//            std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
             for (int i = 0; i < image_width; ++i) {
 //                pixelnum += 1;
                 auto pixel_center = pixel00_loc + (i* pixel_delta_u) + (j * pixel_delta_v);
@@ -92,14 +92,16 @@ private:
         hit_record rec;
 
         if (world.hit(r,interval(0,infinity), rec)) {
-
+            hit_record shadow;
+            if (world.hit(ray(rec.p,lightDir),interval(2e-10,infinity), shadow)) {
+                return rec.obMat.illuminationEq(ambient, color(0.0,0.0,0.0), r.direction(), rec.normal,lightDir);
+            }
             return rec.obMat.illuminationEq(ambient, lightSource, r.direction(), rec.normal,lightDir);
-            //return 0.5 * (rec.normal + color(1,1,1));
         }
-        vec3 unit_direction = unit_vector(r.direction());
-        auto a = 0.5*(unit_direction.x() + 1.0);
-//        return background;
-        return color(0.0,0.0,0.0) + (1.0-a)*color(0.3,0.0,0.0);
+//        vec3 unit_direction = unit_vector(r.direction());
+//        auto a = 0.5*(unit_direction.x() + 1.0);
+//        return color(0.0,0.0,0.0) + (1.0-a)*color(0.3,0.0,0.0); //gradient background color
+        return background;
     }
 };
 

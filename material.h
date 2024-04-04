@@ -47,7 +47,7 @@ public:
         return totalColor;
     }
 
-    color clamp(color vec,double min, double max) {
+    static color clamp(color vec,double min, double max) {
         for (int i = 0; i <= 2; i++) {
             if (vec[i] < 0) {
                 vec[i] = 0;
