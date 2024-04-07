@@ -16,6 +16,7 @@ public:
     double t;
     bool front_face;
     material obMat;
+    bool isSphere;
 
     void set_face_normal(const ray& r, const vec3& outward_normal) {
         // Sets the hit record normal vector.

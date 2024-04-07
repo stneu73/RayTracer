@@ -17,7 +17,7 @@ class camera {
 public:
     double aspect_ratio;
     int image_width;
-    int max_depth = 10;
+    static int max_depth;
 
     std::string filename;
     double vfov;
@@ -40,7 +40,7 @@ public:
                 auto ray_direction = pixel_center - center;
                 ray r(center, ray_direction);
 
-                color pixel_color = ray_color(r,world,ambient, lightSource, background, lightDir);
+                color pixel_color = ray_color(r,world,ambient, lightSource, background, lightDir,0);
                 write_color(out, pixel_color);
             }
         }
@@ -87,16 +87,25 @@ private:
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
-    static color ray_color(const ray& r, const hittable& world, color ambient, color lightSource, color background, vec3 lightDir) {
-
+    static color ray_color(const ray& r, const hittable& world, color ambient, color lightSource, color background, vec3 lightDir, int currDepth) {
         hit_record rec;
 
-        if (world.hit(r,interval(0,infinity), rec)) {
+
+        if (world.hit(r,interval(2e-10,infinity), rec)) {
             hit_record shadow;
-            if (world.hit(ray(rec.p,lightDir),interval(2e-10,infinity), shadow)) {
-                return rec.obMat.illuminationEq(ambient, color(0.0,0.0,0.0), r.direction(), rec.normal,lightDir);
+            currDepth += 1;
+            ray rayReflection = ray(rec.p,r.direction() - 2*rec.normal*dot(r.direction(),rec.normal));
+            if (world.hit(ray(rec.p,lightDir),interval(2e-10,infinity), shadow) && currDepth < max_depth) {
+                return rec.obMat.illuminationEq(
+                        ambient, color(0.0,0.0,0.0), r.direction(), rec.normal,lightDir,
+                        ray_color(rayReflection, world, ambient, lightSource,background,lightDir, currDepth), rec.isSphere);
             }
-            return rec.obMat.illuminationEq(ambient, lightSource, r.direction(), rec.normal,lightDir);
+
+            if (currDepth < max_depth) {
+                return rec.obMat.illuminationEq(
+                        ambient, lightSource, r.direction(), rec.normal, lightDir,
+                        ray_color(rayReflection, world, ambient, lightSource, background, lightDir, currDepth),rec.isSphere);
+            }
         }
 //        vec3 unit_direction = unit_vector(r.direction());
 //        auto a = 0.5*(unit_direction.x() + 1.0);
