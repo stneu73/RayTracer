@@ -13,7 +13,8 @@
 
 class triangle : public hittable {
 public:
-    triangle(point3 a, point3 b, point3 c, const shared_ptr<material>& _mat) : v0(a), v1(b), v2(c),mat(_mat->kd,_mat->ks,_mat->ka,_mat->od,_mat->os,_mat->kgls){}
+    triangle(point3 a, point3 b, point3 c, const shared_ptr<material>& _mat) : v0(a), v1(b), v2(c),
+    mat(_mat->kd,_mat->ks,_mat->ka,_mat->od,_mat->os,_mat->kgls,_mat->refl){}
 
     bool hit(const ray& r, interval(ray_t), hit_record& rec) const override {
         // Compute the plane's normal
@@ -21,6 +22,7 @@ public:
         vec3 v0v2 = v2 - v0;
         // No need to normalize
         vec3 N = cross(v0v1,v0v2); // N
+
 //        double area2 = N.length();
 
         // Step 1: Finding P
@@ -38,6 +40,7 @@ public:
 
         // Check if the triangle is behind the ray
         if (!ray_t.surrounds(t)) return false; // The triangle is behind
+
 
         // Compute the intersection point using equation 1
         vec3 P = r.origin() + t * r.direction();
@@ -62,6 +65,11 @@ public:
         vec3 vp2 = P - v2;
         C = cross(edge2,vp2);
         if (dot(N,C) < 0) return false; // P is on the right side
+
+        rec.isSphere = false;
+        rec.t = t;
+        rec.p = r.at(rec.t);
+        rec.set_face_normal(r,N);
 
         return true; // This ray hits the triangle
     }

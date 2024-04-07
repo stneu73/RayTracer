@@ -19,19 +19,20 @@ public:
         od = {0,0,0};
         os = {0,0,0};
         this->kgls = 0;
+        this->refl = 0;
     }
-    material(double kd, double ks, double ka, color odiff, color ospec, double kgls) {
+
+    material(double kd, double ks, double ka, color odiff, color ospec, double kgls, double refl) {
         this->kd = kd;
         this->ks = ks;
         this->ka = ka;
         od = odiff;
         os = ospec;
         this->kgls = kgls;
-
+        this->refl = refl;
     }
 
-    color illuminationEq(color Ia, color Ip, vec3 v, vec3 normal, vec3 L) {
-
+    color illuminationEq(color Ia, color Ip, vec3 v, vec3 normal, vec3 L,color reflection, bool isSphere) {
 
         color amb = Ia * ka * od;
 
@@ -40,9 +41,9 @@ public:
 
         vec3 r = 2*normal*dot(normal,L)-L;
 
-        double VdotR = dot(unit_vector(v), unit_vector(-r)); //-r because the equation assumes that r is coming from the point
+        double VdotR = dot(unit_vector(v),unit_vector(-r)); //-r because the equation assumes that r is coming from the point
         color specular = ks * os * Ip * pow(std::max(0.0,VdotR),kgls); //phong
-        color totalColor = amb + diffuse + specular;
+        color totalColor = amb + diffuse + specular + reflection * refl;
         totalColor = clamp(totalColor,0.0,1.0);
         return totalColor;
     }
@@ -64,6 +65,7 @@ public:
     color od;
     color os;
     double kgls;
+    double refl;
 
 };
 
